@@ -10,7 +10,7 @@ class MLPPositionalEncoding(nn.Module):
         if hidden_layers_sizes is None:
             hidden_layers_sizes = []
 
-        input_size = side_info_size + 2  # add 2 dimensions for xy coordinates
+        input_size = side_info_size + 4  # add 2 dimensions for xy coordinates
         self.encoder = get_positional_encoder(encoder_name)(input_size, *hidden_layers_sizes, output_size)
 
     def forward(self, kpts, side_info):
