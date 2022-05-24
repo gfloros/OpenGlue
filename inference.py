@@ -252,18 +252,27 @@ def main():
     img0, img1, lafs0, lafs1, inliers = run_inference(args.image0_path, args.image1_path, args.experiment_path,
                                                       args.checkpoint_name, args.device)
 
-    draw_LAF_matches(
-        lafs0,
-        lafs1,
-        torch.arange(len(inliers)).view(-1, 1).repeat(1, 2),
-        K.tensor_to_image(img0),
-        K.tensor_to_image(img1),
-        inliers,
-        draw_dict={'inlier_color': (0.2, 1, 0.2),
-                   'tentative_color': None,
-                   'feature_color': (0.2, 0.5, 1), 'vertical': True})
-
+    img0_cv = cv2.imread(args.image0_path)
+    img1_cv = cv2.imread(args.image1_path)
+    kps0 = opencv_kpts_from_laf(lafs0)
+    kps1 = opencv_kpts_from_laf(lafs1)
+    kornia_idxs = torch.arange(len(inliers)).view(-1, 1).repeat(1, 2)
+    cv2_matches = cv2_matches_from_kornia(torch.ones(len(kornia_idxs)), kornia_idxs)
+    out_img = cv2.drawMatches(img0_cv, kps0, img1_cv, kps1, cv2_matches, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    plt.figure(figsize=(10,5))
+    plt.imshow(out_img)
     plt.savefig(args.output_dir)
+
+    # draw_LAF_matches(
+    #     lafs0,
+    #     lafs1,
+    #     kornia_idxs,
+    #     to_numpy_image(img0),
+    #     to_numpy_image(img1),
+    #     inliers,
+    #     draw_dict={'inlier_color': (0.2, 1, 0.2),
+    #                'tentative_color': None,
+    #                'feature_color': (0.2, 0.5, 1), 'vertical': True})
 
 
 if __name__ == '__main__':
